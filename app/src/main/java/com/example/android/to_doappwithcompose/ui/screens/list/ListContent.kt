@@ -21,24 +21,48 @@ import com.example.android.to_doappwithcompose.data.models.Priority
 import com.example.android.to_doappwithcompose.data.models.ToDoTask
 import com.example.android.to_doappwithcompose.ui.theme.*
 import com.example.android.to_doappwithcompose.util.RequestState
+import com.example.android.to_doappwithcompose.util.SearchAppBarState
 
 @ExperimentalMaterialApi
 @Composable
 fun ListContent(
-    tasks: RequestState<List<ToDoTask>> ,
+    allTasks: RequestState<List<ToDoTask>>,
+    searchedTasks: RequestState<List<ToDoTask>>,
+    searchAppBarState: SearchAppBarState,
     navigationToTaskScreen: (taskId: Int) -> Unit
 ) {
-   if (tasks is RequestState.Success) {
-       if (tasks.data.isEmpty()){
-           EmptyContent()
-       } else {
-           DisplayTasks(
-               tasks = tasks.data,
-               navigationToTaskScreen = navigationToTaskScreen
-           )
-       }
-   }
+    if (searchAppBarState == SearchAppBarState.TRIGGERED) {
+        if (searchedTasks is RequestState.Success) {
+            HandleListContent(
+                tasks = searchedTasks.data,
+                navigateToTaskScreen = navigationToTaskScreen
+            )
+        }
+    } else {
+        if (allTasks is RequestState.Success) {
+            HandleListContent(
+                tasks = allTasks.data,
+                navigateToTaskScreen = navigationToTaskScreen
+            )
+        }
+    }
 }
+
+@Composable
+fun HandleListContent(
+    tasks: List<ToDoTask>,
+    navigateToTaskScreen: (taskId: Int) -> Unit
+) {
+    if (tasks.isEmpty()) {
+        EmptyContent()
+    } else {
+        DisplayTasks(
+            tasks = tasks,
+            navigationToTaskScreen = navigateToTaskScreen
+        )
+    }
+}
+
 @ExperimentalMaterialApi
 @Composable
 fun DisplayTasks(
