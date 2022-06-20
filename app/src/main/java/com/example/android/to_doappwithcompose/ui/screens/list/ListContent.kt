@@ -1,7 +1,11 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.example.android.to_doappwithcompose.ui.screens.list
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -16,13 +20,46 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.android.to_doappwithcompose.data.models.Priority
 import com.example.android.to_doappwithcompose.data.models.ToDoTask
 import com.example.android.to_doappwithcompose.ui.theme.*
-
-@Composable
-fun ListContent() {
-
-}
+import com.example.android.to_doappwithcompose.util.RequestState
 
 @ExperimentalMaterialApi
+@Composable
+fun ListContent(
+    tasks: RequestState<List<ToDoTask>> ,
+    navigationToTaskScreen: (taskId: Int) -> Unit
+) {
+   if (tasks is RequestState.Success) {
+       if (tasks.data.isEmpty()){
+           EmptyContent()
+       } else {
+           DisplayTasks(
+               tasks = tasks.data,
+               navigationToTaskScreen = navigationToTaskScreen
+           )
+       }
+   }
+}
+@ExperimentalMaterialApi
+@Composable
+fun DisplayTasks(
+    tasks: List<ToDoTask>,
+    navigationToTaskScreen: (taskId: Int) -> Unit
+) {
+    LazyColumn {
+        this.items(
+            items = tasks,
+            key = { task ->
+                task.id
+            }
+        ) { task ->
+            TaskItem(
+                toDoTask = task,
+                navigationToTaskScreen = navigationToTaskScreen
+            )
+        }
+    }
+}
+
 @Composable
 fun TaskItem(
     toDoTask: ToDoTask,
@@ -52,16 +89,16 @@ fun TaskItem(
                     maxLines = 1
                 )
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     contentAlignment = Alignment.TopEnd
 
                 ) {
                     Canvas(
                         modifier = Modifier
-                            .width(PRIORITY_INDICATOR_SIZE)
-                            .height(PRIORITY_INDICATOR_SIZE)
+                            .size(PRIORITY_INDICATOR_SIZE)
                     ) {
                         drawCircle(
                             color = toDoTask.priority.color
