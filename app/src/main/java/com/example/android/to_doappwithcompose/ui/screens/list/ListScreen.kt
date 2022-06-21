@@ -21,6 +21,7 @@ fun ListScreen(
 ) {
     LaunchedEffect(key1 = true) {
         sharedViewModel.getAllTasks()
+        sharedViewModel.readSortState()
     }
 
     val action by sharedViewModel.action
@@ -31,6 +32,10 @@ fun ListScreen(
     val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
     val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
     val searchTextState: String by sharedViewModel.searchTextState
+    val sortState by sharedViewModel.sortState.collectAsState()
+    val lowPriorityTasks by sharedViewModel.lowPriorityTasks.collectAsState()
+    val highPriorityTasks by sharedViewModel.highPriorityTasks.collectAsState()
+
 
     val scaffoldState = rememberScaffoldState()
     DisplaySnackBar(
@@ -55,6 +60,9 @@ fun ListScreen(
                 allTasks = allTasks,
                 searchedTasks = searchedTasks,
                 searchAppBarState = searchAppBarState,
+                lowPriorityTasks = lowPriorityTasks,
+                highPriorityTasks = highPriorityTasks,
+                sortState = sortState,
                 navigationToTaskScreen = navigateToTaskScreen
             )
         },
@@ -117,9 +125,11 @@ private fun setMessage(
     action: Action,
     taskTitle: String
 ): String {
-    return when(action){
+    return when (action) {
         Action.DELETE_ALL -> "All tasks removed"
-        else -> {"${action.name}: $taskTitle"}
+        else -> {
+            "${action.name}: $taskTitle"
+        }
     }
 }
 

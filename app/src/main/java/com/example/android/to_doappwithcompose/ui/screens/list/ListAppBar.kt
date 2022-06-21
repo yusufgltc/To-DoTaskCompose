@@ -41,7 +41,9 @@ fun ListAppBar(
                 onSearchClicked = {
                     sharedViewModel.searchAppBarState.value = SearchAppBarState.OPENED
                 },
-                onSortClicked = {},
+                onSortClicked = {
+                    sharedViewModel.persistSortState(it)
+                },
                 onDeleteAllConfirmed = {
                     sharedViewModel.action.value = Action.DELETE_ALL
                 }
@@ -97,19 +99,19 @@ fun ListAppBarActions(
     onDeleteAllConfirmed: () -> Unit
 ) {
 
-    var openDialog by remember { mutableStateOf(false)}
+    var openDialog by remember { mutableStateOf(false) }
 
     DisplayAlertDialog(
         title = stringResource(id = R.string.delete_task_all),
         message = stringResource(id = R.string.delete_task_all_confirmation),
-        openDialog =openDialog,
+        openDialog = openDialog,
         closeDialog = { openDialog = false },
-        onYesClicked = {onDeleteAllConfirmed}
+        onYesClicked = { onDeleteAllConfirmed }
     )
 
     SearchAction(onSearchClicked = onSearchClicked)
     SortAction(onSortClicked = onSortClicked)
-    DeleteAllAction(onDeleteAllConfirmed = {openDialog = true})
+    DeleteAllAction(onDeleteAllConfirmed = { openDialog = true })
 }
 
 @Composable
@@ -268,9 +270,9 @@ fun SearchAppBar(
                             trailingIconState = TrailingIconState.READY_TO_CLOSE
                         }
                         TrailingIconState.READY_TO_CLOSE -> {
-                            if (text.isNotEmpty()){
+                            if (text.isNotEmpty()) {
                                 onTextChange("")
-                            }else {
+                            } else {
                                 onCloseClicked()
                                 trailingIconState = TrailingIconState.READY_TO_DELETE
                             }
