@@ -24,7 +24,7 @@
     <string name="delete_task_confirmation">Are you sure that want to remove \'%1$s\'</string>
     <string name="delete_task_all">Remove all tasks?</string>
     <string name="delete_task_all_confirmation">Are you sure that want to remove all tasks?</string>
-
+    <string name="to_do_logo">To Do Logo</string>
 
 
 </resources>
