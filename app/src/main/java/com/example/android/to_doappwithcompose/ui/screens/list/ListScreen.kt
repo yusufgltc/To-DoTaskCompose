@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.android.to_doappwithcompose.R
-import com.example.android.to_doappwithcompose.data.models.ToDoTask
 import com.example.android.to_doappwithcompose.ui.theme.fabBackgroundColor
 import com.example.android.to_doappwithcompose.ui.veiwmodels.SharedViewModel
 import com.example.android.to_doappwithcompose.util.Action
@@ -17,22 +16,21 @@ import kotlinx.coroutines.launch
 @ExperimentalMaterialApi
 @Composable
 fun ListScreen(
+    action: Action,
     navigateToTaskScreen: (taskId: Int) -> Unit,
     sharedViewModel: SharedViewModel
 ) {
-    LaunchedEffect(key1 = true) {
-        sharedViewModel.getAllTasks()
-        sharedViewModel.readSortState()
+    LaunchedEffect(key1 = action) {
+        sharedViewModel.handleDatabaseAction(action = action)
     }
 
-    val action by sharedViewModel.action
 
     //by key change the format state to list immediately
     //val allTasks = sharedViewModel.allTask.collectAsState()
     val allTasks by sharedViewModel.allTask.collectAsState()
     val searchedTasks by sharedViewModel.searchedTasks.collectAsState()
-    val searchAppBarState: SearchAppBarState by sharedViewModel.searchAppBarState
-    val searchTextState: String by sharedViewModel.searchTextState
+    val searchAppBarState: SearchAppBarState = sharedViewModel.searchAppBarState
+    val searchTextState: String = sharedViewModel.searchTextState
     val sortState by sharedViewModel.sortState.collectAsState()
     val lowPriorityTasks by sharedViewModel.lowPriorityTasks.collectAsState()
     val highPriorityTasks by sharedViewModel.highPriorityTasks.collectAsState()
@@ -41,10 +39,10 @@ fun ListScreen(
     val scaffoldState = rememberScaffoldState()
     DisplaySnackBar(
         scaffoldState = scaffoldState,
-        handleDatabaseActions = { sharedViewModel.handleDatabaseAction(action) },
-        taskTitle = sharedViewModel.title.value,
+        onComplete = { sharedViewModel.updateAction(newAction = it) },
+        taskTitle = sharedViewModel.title,
         action = action,
-        onUndoClicked = { sharedViewModel.action.value = it }
+        onUndoClicked = { sharedViewModel.updateAction(newAction = it) }
     )
 
     Scaffold(
@@ -66,8 +64,10 @@ fun ListScreen(
                 sortState = sortState,
                 navigationToTaskScreen = navigateToTaskScreen,
                 onSwipeToDelete = { action, toDoTask ->
-                    sharedViewModel.action.value = action
+                    //sharedViewModel.action = action
+                    sharedViewModel.updateAction(newAction = action)
                     sharedViewModel.updateTaskFields(selectedTask = toDoTask)
+                    scaffoldState.snackbarHostState.currentSnackbarData?.dismiss()
                 }
             )
         },
@@ -98,12 +98,12 @@ fun ListFab(
 @Composable
 fun DisplaySnackBar(
     scaffoldState: ScaffoldState,
-    handleDatabaseActions: () -> Unit,
+    onComplete: (Action) -> Unit,
     taskTitle: String,
     action: Action,
     onUndoClicked: (Action) -> Unit
 ) {
-    handleDatabaseActions()
+
 
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = action) {
@@ -122,6 +122,7 @@ fun DisplaySnackBar(
                     onUndoClicked = onUndoClicked
                 )
             }
+            onComplete(Action.NO_ACTION)
         }
     }
 }
